@@ -1,0 +1,24 @@
+# Сборка Maven
+target/
+
+# Скомпилированные файлы и артефакты
+*.class
+*.jar
+*.war
+
+# Отчёты о покрытии
+*.exec
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Логи
+*.log
+
+# ОС
+.DS_Store
+Thumbs.db
