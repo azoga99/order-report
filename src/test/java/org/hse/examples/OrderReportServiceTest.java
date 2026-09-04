@@ -51,6 +51,17 @@ class OrderReportServiceTest {
     }
 
     @Test
+    @DisplayName("Сохраняет исходный порядок заказов с одинаковой суммой")
+    void keepsOrderOfEqualAmounts() {
+        OrderReportService service = new OrderReportService(stubPolicy(Map.of()));
+        Order duplicate = new Order(4, "D", new BigDecimal("500.00"), new Payment.Sbp("+7903"));
+
+        List<Order> sorted = service.sortedByAmount(List.of(duplicate, medium, large));
+
+        assertEquals(List.of(large, duplicate, medium), sorted);
+    }
+
+    @Test
     @DisplayName("Суммирует комиссии всех заказов, используя переданную политику")
     void sumsCommissions() {
         OrderReportService service = new OrderReportService(
