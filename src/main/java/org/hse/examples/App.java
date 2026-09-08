@@ -16,9 +16,14 @@ public class App {
                 new Order(4, "Ольга Иванова", new BigDecimal("14080.00"), new Payment.Card("**** 8801", true))
         );
 
-        CommissionPolicy commissionPolicy = new RateCommissionPolicy();
-        OrderReportService reportService = new OrderReportService(commissionPolicy);
-        OrderFormatter formatter = new OrderFormatter();
+        ApplicationContext context = ApplicationContext.getContext();
+
+        CommissionPolicy commissionPolicy = context
+                .getInstance("commissionPolicy", CommissionPolicy.class).orElseThrow();
+        OrderReportService reportService = context
+                .getInstance("orderReportService", OrderReportService.class).orElseThrow();
+        OrderFormatter formatter = context
+                .getInstance("orderFormatter", OrderFormatter.class).orElseThrow();
 
         reportService.sortedByAmount(orders).stream()
                 .map(order -> formatter.format(order, commissionPolicy.commissionFor(order)))
