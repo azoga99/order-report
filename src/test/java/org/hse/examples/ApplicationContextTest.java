@@ -1,26 +1,39 @@
 package org.hse.examples;
 
+import org.hse.examples.application.OrderReportService;
+import org.hse.examples.domain.CommissionPolicy;
+import org.hse.examples.domain.Order;
+import org.hse.examples.domain.Payment;
+import org.hse.examples.domain.RateCommissionPolicy;
+import org.hse.examples.infrastructure.OrderFormatter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/** Тесты контекста приложения. */
+/** Тесты контекста Spring: какие объекты в нём есть и как они связаны. */
+@SpringBootTest
 class ApplicationContextTest {
 
-    private final ApplicationContext context = ApplicationContext.getContext();
+    @Autowired
+    private ApplicationContext context;
 
     @Test
     @DisplayName("Возвращает политику комиссий")
     void providesCommissionPolicy() {
-        CommissionPolicy policy = context.getInstance("commissionPolicy", CommissionPolicy.class).orElseThrow();
+        CommissionPolicy policy = context.getBean("commissionPolicy", CommissionPolicy.class);
 
         assertInstanceOf(RateCommissionPolicy.class, policy);
     }
@@ -28,13 +41,13 @@ class ApplicationContextTest {
     @Test
     @DisplayName("Возвращает форматтер")
     void providesFormatter() {
-        assertTrue(context.getInstance("orderFormatter", OrderFormatter.class).isPresent());
+        assertNotNull(context.getBean("orderFormatter", OrderFormatter.class));
     }
 
     @Test
     @DisplayName("Сервис отчёта собран с политикой комиссий из контекста")
     void reportServiceUsesContextPolicy() {
-        OrderReportService service = context.getInstance("orderReportService", OrderReportService.class).orElseThrow();
+        OrderReportService service = context.getBean("orderReportService", OrderReportService.class);
         List<Order> orders = List.of(
                 new Order(1, "A", new BigDecimal("1000.00"), new Payment.Card("**** 4242", false)), // 15.00
                 new Order(2, "B", new BigDecimal("1000.00"), new Payment.Sbp("+7900")));            // 4.00
@@ -45,29 +58,28 @@ class ApplicationContextTest {
     @Test
     @DisplayName("Повторное обращение возвращает тот же объект")
     void returnsSameInstance() {
-        OrderFormatter first = context.getInstance("orderFormatter", OrderFormatter.class).orElseThrow();
-        OrderFormatter second = context.getInstance("orderFormatter", OrderFormatter.class).orElseThrow();
+        OrderFormatter first = context.getBean("orderFormatter", OrderFormatter.class);
+        OrderFormatter second = context.getBean("orderFormatter", OrderFormatter.class);
 
         assertSame(first, second);
     }
 
     @Test
-    @DisplayName("getContext возвращает один и тот же контекст")
-    void contextIsSingleton() {
-        assertSame(ApplicationContext.getContext(), ApplicationContext.getContext());
+    @DisplayName("По имени и по типу возвращается один и тот же объект")
+    void sameInstanceByNameAndType() {
+        assertSame(context.getBean("commissionPolicy"), context.getBean(CommissionPolicy.class));
     }
 
     @Test
-    @DisplayName("Неизвестное имя даёт пустой Optional")
-    void unknownNameGivesEmpty() {
-        assertTrue(context.getInstance("unknownService", Object.class).isEmpty());
+    @DisplayName("Неизвестное имя приводит к ошибке")
+    void unknownNameFails() {
+        assertThrows(NoSuchBeanDefinitionException.class, () -> context.getBean("unknownService"));
     }
 
     @Test
-    @DisplayName("Несовпадение типа даёт пустой Optional")
-    void typeMismatchGivesEmpty() {
-        Optional<OrderFormatter> wrongType = context.getInstance("commissionPolicy", OrderFormatter.class);
-
-        assertTrue(wrongType.isEmpty());
+    @DisplayName("Несовпадение типа приводит к ошибке")
+    void typeMismatchFails() {
+        assertThrows(BeanNotOfRequiredTypeException.class,
+                () -> context.getBean("commissionPolicy", OrderFormatter.class));
     }
 }

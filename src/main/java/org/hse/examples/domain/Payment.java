@@ -1,4 +1,4 @@
-package org.hse.examples;
+package org.hse.examples.domain;
 
 import java.math.BigDecimal;
 

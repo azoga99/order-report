@@ -1,5 +1,7 @@
-package org.hse.examples;
+package org.hse.examples.infrastructure;
 
+import org.hse.examples.domain.Order;
+import org.hse.examples.domain.Payment;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

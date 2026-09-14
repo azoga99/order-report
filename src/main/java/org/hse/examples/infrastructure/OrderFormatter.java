@@ -1,9 +1,14 @@
-package org.hse.examples;
+package org.hse.examples.infrastructure;
+
+import org.hse.examples.domain.Order;
+import org.hse.examples.domain.Payment;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /** Преобразование заказов и сумм в строки для вывода */
+@Component
 public class OrderFormatter {
 
     /** Строка заказа: покупатель, сумма, способ оплаты и комиссия */
