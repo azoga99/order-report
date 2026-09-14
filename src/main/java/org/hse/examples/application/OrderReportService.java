@@ -1,10 +1,15 @@
-package org.hse.examples;
+package org.hse.examples.application;
+
+import org.hse.examples.domain.CommissionPolicy;
+import org.hse.examples.domain.Order;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 
 /** Расчёты по списку заказов: сортировка и итоговые суммы */
+@Service
 public class OrderReportService {
 
     private final CommissionPolicy commissionPolicy;

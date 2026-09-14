@@ -1,5 +1,10 @@
 package org.hse.examples;
 
+import org.hse.examples.application.OrderReportService;
+import org.hse.examples.domain.CommissionPolicy;
+import org.hse.examples.domain.Order;
+import org.hse.examples.domain.Payment;
+import org.hse.examples.domain.RateCommissionPolicy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
