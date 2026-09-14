@@ -12,51 +12,58 @@
 | СБП                        | 0.4 %  |
 | Наличные                   | 0 %    |
 
-## Структура проекта
+## Архитектура
+
+Проект разложен по слоям Onion-архитектуры. Каждый слой — отдельный пакет:
 
 ```
 src/main/java/org/hse/examples/
-  App.java                     точка входа, демонстрационный сценарий
-  ApplicationContext.java      контекст приложения: создаёт и выдаёт объекты по имени
-  Order.java                   заказ (record с валидацией суммы)
-  Payment.java                 способ оплаты (sealed interface: Card, Sbp, Cash)
-  CommissionPolicy.java        правило расчёта комиссии
-  RateCommissionPolicy.java    комиссия по фиксированным ставкам
-  OrderReportService.java      сортировка заказов и суммирование комиссий
-  OrderFormatter.java          форматирование строк отчёта
-src/test/java/org/hse/examples/  модульные и интеграционный тесты (JUnit 5)
+  App.java                       точка входа Spring Boot
+  domain/                        доменный слой, без зависимостей от фреймворков
+    Order.java                   заказ (record с валидацией суммы)
+    Payment.java                 способ оплаты (sealed interface: Card, Sbp, Cash)
+    CommissionPolicy.java        правило расчёта комиссии
+    RateCommissionPolicy.java    комиссия по фиксированным ставкам
+  application/                   слой приложения, сценарии работы
+    OrderReportService.java      сортировка заказов и суммирование комиссий
+  infrastructure/                инфраструктура: Spring, вывод в консоль
+    DomainConfig.java            регистрация доменных объектов в контексте
+    OrderFormatter.java          форматирование строк отчёта
+    OrderReportRunner.java       вывод отчёта при старте приложения
+src/main/resources/
+  application.properties         отключены баннер и лишние логи Spring
+src/test/java/org/hse/examples/  тесты, разложены по тем же пакетам
 ```
 
-## Контекст приложения
+Зависимости направлены внутрь:
 
-Раньше `App.main` сам создавал политику комиссий, сервис отчёта и форматтер и связывал их между собой.
-Теперь это делает `ApplicationContext`.
+- `domain` ничего не импортирует из других слоёв и из Spring;
+- `application` использует только `domain`;
+- `infrastructure` использует `application` и `domain`.
 
-`ApplicationContext` — интерфейс с двумя элементами:
+`App` лежит в корневом пакете, чтобы сканирование компонентов Spring находило классы всех слоёв.
 
-- статический `getContext()` — точка входа, возвращает контекст;
-- `<T> Optional<T> getInstance(String name, Class<T> clazz)` — выдаёт объект по имени и типу.
+## Контекст Spring
 
-Реализация `ApplicationContextImpl` лежит в том же файле и наружу не видна. Все объекты она создаёт
-в конструкторе и складывает в `Map<String, Object>` под именами `commissionPolicy`,
-`orderReportService` и `orderFormatter`. Связывание зависимостей тоже происходит здесь:
-`OrderReportService` получает ту же политику комиссий, что лежит в контексте под своим именем.
+Самописный `ApplicationContext` из прошлого задания удалён: объекты теперь создаёт и связывает Spring.
 
-Использование:
+| Бин                  | Класс                  | Как зарегистрирован                         |
+|----------------------|------------------------|---------------------------------------------|
+| `commissionPolicy`   | `RateCommissionPolicy` | метод `@Bean` в `DomainConfig`              |
+| `orderReportService` | `OrderReportService`   | аннотация `@Service`                        |
+| `orderFormatter`     | `OrderFormatter`       | аннотация `@Component`                      |
+| `orderReportRunner`  | `OrderReportRunner`    | аннотация `@Component`, `CommandLineRunner` |
 
-```java
-ApplicationContext context = ApplicationContext.getContext();
-OrderFormatter formatter = context.getInstance("orderFormatter", OrderFormatter.class).orElseThrow();
-```
+Зависимости внедряются через конструкторы: `OrderReportService` получает политику комиссий,
+`OrderReportRunner` — политику, сервис и форматтер. Все бины — синглтоны (область видимости Spring по умолчанию).
 
-Замечания по реализации:
+Код отчёта из `App.main` перенесён в `OrderReportRunner` без изменений, `App` теперь только запускает Spring.
 
-- контекст — синглтон: `getContext()` всегда возвращает один и тот же экземпляр, объекты внутри
-  создаются один раз и переиспользуются;
-- `getInstance` возвращает пустой `Optional`, если имени нет в контексте либо объект другого типа —
-  вызывающий код сам решает, считать это ошибкой или нет (в `App` стоит `orElseThrow`);
-- список заказов в контекст не вынесен: это демонстрационные данные, а не объект приложения,
-  поэтому он остался в `App`.
+## Независимость домена
+
+На доменные классы не повешено ни одной аннотации Spring. `RateCommissionPolicy` попадает в контекст через
+`@Bean` в `DomainConfig`, а сам конфигурационный класс лежит в `infrastructure`. Поэтому домен компилируется
+и тестируется без Spring, и при смене фреймворка его код не придётся менять.
 
 ## Требования
 
@@ -74,7 +81,13 @@ mvn clean package
 ## Запуск
 
 ```bash
-java -cp target/classes org.hse.examples.App
+java -jar target/lesson4-1.0-SNAPSHOT.jar
+```
+
+или без сборки JAR:
+
+```bash
+mvn spring-boot:run
 ```
 
 ## Тесты
@@ -86,12 +99,14 @@ mvn test
 Тесты написаны на JUnit 5 и покрывают расчёт ставок, сортировку и агрегацию заказов,
 форматирование вывода, валидацию суммы и граничные случаи (нулевая сумма, пустой список).
 
-Отдельный `ApplicationContextTest` проверяет сам контекст:
+Что сделано, чтобы тесты продолжали работать после перехода на слои и Spring:
 
-- объекты возвращаются и имеют нужный тип;
-- `OrderReportService` из контекста считает комиссию по той же политике, что лежит в контексте;
-- повторное обращение по тому же имени даёт тот же экземпляр, `getContext()` — тот же контекст;
-- неизвестное имя и запрос с неподходящим типом дают пустой `Optional`.
+- тестовые классы перенесены в те же пакеты, что и проверяемые классы; в них поменялись только `package`
+  и импорты, сами проверки не трогались;
+- тесты доменного слоя, сервиса и форматтера по-прежнему создают объекты через `new` и Spring не поднимают;
+- `ApplicationContextTest` проверял самописный контекст, теперь он проверяет контекст Spring (`@SpringBootTest`)
+  по тем же сценариям: объекты нужного типа есть, сервис собран с политикой из контекста, повторное
+  обращение даёт тот же экземпляр, неизвестное имя и неподходящий тип приводят к ошибке.
 
 ## Плагин JaCoCo
 
@@ -109,7 +124,7 @@ mvn clean verify
 ```
 
 Отчёт открывается в браузере: `target/site/jacoco/index.html`.
-Текущее покрытие — 98 % строк и 100 % ветвлений.
+Текущее покрытие — 100 % строк и 100 % ветвлений.
 
 ## Ветки
 
