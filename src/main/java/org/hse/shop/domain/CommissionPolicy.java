@@ -5,5 +5,5 @@ import java.math.BigDecimal;
 /** Правило расчёта комиссии платёжной системы */
 public interface CommissionPolicy {
 
-    BigDecimal commissionFor(Order order);
+    BigDecimal commissionFor(BigDecimal amount, Payment payment);
 }
