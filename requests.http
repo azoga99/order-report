@@ -1,0 +1,99 @@
+### Примеры запросов к API магазина.
+### Открываются в IntelliJ IDEA или в VS Code с расширением REST Client.
+### Рассчитаны на только что запущенное приложение: в базе пять товаров и два покупателя из data.sql.
+
+@host = http://localhost:8080
+
+### Каталог
+GET {{host}}/api/products
+
+### Только товары в наличии
+GET {{host}}/api/products?inStock=true
+
+### Новый товар (появится без остатка)
+POST {{host}}/api/products
+Content-Type: application/json
+
+{"name": "Турка медная", "price": 990.00}
+
+### Поступление на склад
+POST {{host}}/api/products/6/supply
+Content-Type: application/json
+
+{"quantity": 10}
+
+### Смена цены
+PUT {{host}}/api/products/6/price
+Content-Type: application/json
+
+{"price": 890.00}
+
+### Регистрация покупателя
+POST {{host}}/api/customers
+Content-Type: application/json
+
+{"name": "Игорь Лебедев", "phone": "+79265550011"}
+
+### Сколько стоит доставка курьером для корзины на 3190 руб.
+GET {{host}}/api/delivery/cost?method=COURIER&itemsTotal=3190
+
+### Оформление заказа: чайник и две кружки курьером
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{
+  "customerId": 2,
+  "delivery": "COURIER",
+  "items": [
+    {"productId": 1, "quantity": 1},
+    {"productId": 2, "quantity": 2}
+  ]
+}
+
+### Заказ по номеру
+GET {{host}}/api/orders/1
+
+### Оплата картой: в базе останутся только последние 4 цифры
+POST {{host}}/api/orders/1/payment
+Content-Type: application/json
+
+{"method": "CARD", "cardNumber": "2200 1234 5678 4242", "foreignIssuer": false}
+
+### Повторная оплата — 409
+POST {{host}}/api/orders/1/payment
+Content-Type: application/json
+
+{"method": "SBP", "phone": "+79161234567"}
+
+### Второй заказ: оплата наличными с почтовой доставкой
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{"customerId": 1, "delivery": "POST", "items": [{"productId": 5, "quantity": 2}]}
+
+###
+POST {{host}}/api/orders/2/payment
+Content-Type: application/json
+
+{"method": "CASH", "received": 1500}
+
+### История заказов покупателя
+GET {{host}}/api/customers/2/orders
+
+### Отчёт по продажам (подставьте сегодняшнюю дату)
+GET {{host}}/api/reports/sales?from=2026-09-01&to=2026-09-30
+
+### Отмена оплаченного заказа: товары вернутся на склад, в ответе сумма возврата
+POST {{host}}/api/orders/1/cancel
+
+### Товара не хватает — 409, ничего не списывается
+POST {{host}}/api/orders
+Content-Type: application/json
+
+{"customerId": 1, "delivery": "PICKUP", "items": [{"productId": 3, "quantity": 100}]}
+
+### Некорректные данные — 400 с перечнем полей
+POST {{host}}/api/products
+Content-Type: application/json
+
+{"name": "", "price": -1}

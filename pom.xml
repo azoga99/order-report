@@ -11,13 +11,13 @@
         <relativePath/>
     </parent>
 
-    <groupId>org.hse.examples</groupId>
-    <artifactId>lesson4</artifactId>
+    <groupId>org.hse</groupId>
+    <artifactId>shop</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Order Report</name>
-    <description>Отчёт по заказам с расчётом комиссии платёжных систем</description>
+    <name>Shop</name>
+    <description>Интернет-магазин: каталог, заказы, оплата и отчёт по продажам</description>
 
     <properties>
         <java.version>21</java.version>
@@ -32,10 +32,43 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- REST API и проверка входных данных -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Хранение данных: Spring Data JPA и встроенная база H2 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- JUnit 5, AssertJ, Mockito и поддержка @SpringBootTest -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- MockMvc для проверки REST API -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- @DataJpaTest для проверки хранилищ -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
