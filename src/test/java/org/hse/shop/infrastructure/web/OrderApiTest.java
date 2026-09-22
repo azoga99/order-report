@@ -46,7 +46,8 @@ class OrderApiTest {
                 .hasStatusOk()
                 .bodyJson().isLenientlyEqualTo("""
                         {"status": "PAID", "payment": {"method": "CARD", "cardNumber": "**** 4242"},
-                         "commission": 112.05}""");
+                         "commission": 112.05}""")
+                .doesNotHavePath("$.payment.phone");
 
         assertThat(api.post("/api/orders/%d/payment".formatted(order), """
                 {"method": "SBP", "phone": "+79161234567"}"""))

@@ -1,5 +1,6 @@
 package org.hse.shop.infrastructure.web;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
 import org.hse.shop.domain.Payment;
 
@@ -10,6 +11,7 @@ import java.math.BigDecimal;
  * CARD — cardNumber и foreignIssuer, SBP — phone, CASH — received.
  * От номера карты сохраняются только последние четыре цифры.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record PaymentDto(@NotNull Method method, String cardNumber, Boolean foreignIssuer, String phone,
                          BigDecimal received) {
 

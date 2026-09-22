@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 class OrderPlacementServiceTest {
 
     private static final ZoneId MOSCOW = ZoneId.of("Europe/Moscow");
-    private static final Clock CLOCK = Clock.fixed(Instant.parse("2026-09-01T09:00:00Z"), MOSCOW);
+    private static final Clock CLOCK = Clock.fixed(Instant.parse("2026-09-01T09:00:00.123456Z"), MOSCOW);
 
     @Mock
     private CustomerService customers;
@@ -58,7 +58,7 @@ class OrderPlacementServiceTest {
     }
 
     @Test
-    @DisplayName("Оформляет заказ: списывает товары, берёт цены из каталога и считает доставку")
+    @DisplayName("Оформляет заказ: списывает товары, берёт цены из каталога, время — с точностью до секунды")
     void placesOrder() {
         when(stock.reserve(1L, 2)).thenReturn(new Product(1L, "Чайник", new BigDecimal("2490.00"), 13));
         when(stock.reserve(2L, 1)).thenReturn(new Product(2L, "Кружка", new BigDecimal("350.00"), 39));

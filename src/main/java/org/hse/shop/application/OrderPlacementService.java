@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -54,7 +55,7 @@ public class OrderPlacementService {
 
         BigDecimal itemsTotal = items.stream().map(OrderItem::amount).reduce(BigDecimal.ZERO, BigDecimal::add);
         Order order = Order.create(customerId, items, delivery, deliveryCost.costFor(delivery, itemsTotal),
-                LocalDateTime.now(clock));
+                LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS));
         return orders.save(order);
     }
 
