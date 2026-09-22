@@ -1,8 +1,8 @@
-package org.hse.examples.application;
+package org.hse.shop.application;
 
-import org.hse.examples.domain.CommissionPolicy;
-import org.hse.examples.domain.Order;
-import org.hse.examples.domain.Payment;
+import org.hse.shop.domain.CommissionPolicy;
+import org.hse.shop.domain.Order;
+import org.hse.shop.domain.Payment;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

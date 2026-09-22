@@ -1,15 +1,15 @@
-package org.hse.examples;
+package org.hse.shop;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Демонстрационный запуск отчёта по заказам.
+ * Точка входа интернет-магазина.
  */
 @SpringBootApplication
-public class App {
+public class ShopApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(App.class, args);
+        SpringApplication.run(ShopApplication.class, args);
     }
 }

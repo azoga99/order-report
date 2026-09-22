@@ -11,13 +11,13 @@
         <relativePath/>
     </parent>
 
-    <groupId>org.hse.examples</groupId>
-    <artifactId>lesson4</artifactId>
+    <groupId>org.hse</groupId>
+    <artifactId>shop</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Order Report</name>
-    <description>Отчёт по заказам с расчётом комиссии платёжных систем</description>
+    <name>Shop</name>
+    <description>Интернет-магазин: каталог, заказы, оплата и отчёт по продажам</description>
 
     <properties>
         <java.version>21</java.version>

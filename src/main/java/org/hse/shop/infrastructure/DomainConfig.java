@@ -1,7 +1,7 @@
-package org.hse.examples.infrastructure;
+package org.hse.shop.infrastructure;
 
-import org.hse.examples.domain.CommissionPolicy;
-import org.hse.examples.domain.RateCommissionPolicy;
+import org.hse.shop.domain.CommissionPolicy;
+import org.hse.shop.domain.RateCommissionPolicy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

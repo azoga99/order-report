@@ -1,4 +1,4 @@
-package org.hse.examples.domain;
+package org.hse.shop.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
